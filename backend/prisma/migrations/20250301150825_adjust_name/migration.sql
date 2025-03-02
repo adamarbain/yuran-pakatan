@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Yuran" ADD COLUMN     "yuran2028" INTEGER,
+ADD COLUMN     "yuran2029" INTEGER,
+ADD COLUMN     "yuran2030" INTEGER,
+ADD COLUMN     "yuran2031" INTEGER,
+ADD COLUMN     "yuran2032" INTEGER;
