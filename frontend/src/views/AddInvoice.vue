@@ -1,54 +1,109 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import { useToast } from "primevue/usetoast";
+import Card from "primevue/card";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
+import Toast from "primevue/toast";
 
+const toast = useToast();
 const members = ref([]);
 const selectedMember = ref(null);
 const year = ref("");
 const amount = ref("");
+const isLoading = ref(false);
 
 onMounted(async () => {
-  const response = await axios.get("http://localhost:5000/api/invoices");
-  members.value = response.data;
+  try {
+    const response = await axios.get("http://localhost:5000/api/invoices");
+    members.value = response.data;
+  } catch (error) {
+    toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch members.", life: 3000 });
+  }
 });
 
 const addInvoice = async () => {
-  if (!selectedMember.value) {
-    alert("Please select a member.");
+  if (!selectedMember.value || !year.value || !amount.value) {
+    toast.add({ severity: "warn", summary: "Validation Error", detail: "Please fill in all fields.", life: 3000 });
     return;
   }
 
-  console.log("Selected Member: ",selectedMember.value);
-  console.log("Year: ", "yuran" + year.value);
-  console.log("Amount: ",amount.value);
   try {
+    isLoading.value = true;
     await axios.put(`http://localhost:5000/api/invoices/${selectedMember.value.id}`, {
       year: `yuran${year.value}`, // Convert 2024 -> yuran2024
       amount: amount.value,
     });
 
-    alert("Invoice updated successfully!");
+    toast.add({ severity: "success", summary: "Success", detail: "Invoice updated successfully!", life: 3000 });
+
+    // Reset form
+    selectedMember.value = null;
     year.value = "";
     amount.value = "";
   } catch (error) {
-    console.error("Error updating invoice:", error);
-    alert("Error updating invoice.");
+    toast.add({ severity: "error", summary: "Error", detail: "Failed to update invoice.", life: 3000 });
+  } finally {
+    isLoading.value = false;
   }
 };
-
 </script>
 
 <template>
-  <div>
-    <h1>Add Invoice</h1>
-    <select v-model="selectedMember" placeholder="Select Member">
-      <option v-for="member in members" :key="member.id" :value="member">
-        {{ member.namaAhli }}
-      </option>
-    </select>
+  <div class="form-container">
+    <Card class="form-card">
+      <template #title>
+        <h1 class="text-2xl font-bold text-primary">Kemaskini Yuran Ahli</h1>
+      </template>
 
-    <input v-model="year" placeholder="Enter Year (e.g., 2024)" />
-    <input v-model="amount" placeholder="Enter Amount" />
-    <button @click="addInvoice">Add Invoice</button>
+      <template #content>
+        <div class="flex flex-column gap-3">
+          <label>Pilih Ahli</label>
+          <Dropdown 
+            v-model="selectedMember" 
+            :options="members" 
+            optionLabel="namaAhli" 
+            placeholder="Pilih Ahli" 
+            class="w-full p-inputtext-lg"
+            :filter="true"
+          />
+
+          <label>Tahun</label>
+          <InputText v-model="year" placeholder="Masukkan Tahun (e.g., 2024)" class="p-inputtext-lg w-full" />
+
+          <label>Jumlah</label>
+          <InputText v-model="amount" placeholder="Masukkan Jumlah" class="p-inputtext-lg w-full" />
+
+          <Button 
+            :label="isLoading ? 'Mengemaskini...' : 'Kemaskini Yuran'" 
+            icon="pi pi-file" 
+            class="p-button-primary w-full mt-3" 
+            :disabled="isLoading" 
+            @click="addInvoice" 
+          />
+        </div>
+      </template>
+    </Card>
+
+    <Toast />
   </div>
 </template>
+
+<style scoped>
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--color-background-soft);
+}
+
+.form-card {
+  width: 450px;
+  padding: 1.5rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+</style>

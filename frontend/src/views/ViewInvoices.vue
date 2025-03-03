@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
+import  Dropdown  from "primevue/dropdown";
+import  DataTable  from "primevue/datatable";
+import  Column  from "primevue/column";
+
 
 const invoices = ref([]);
 const selectedKawasan = ref("");
@@ -25,60 +29,38 @@ const filteredInvoices = computed(() => {
 </script>
 
 <template>
-  <div>
-    <h1>View All Invoices</h1>
-    <select v-model="selectedKawasan">
-      <option value="">All Kawasan</option>
-      <option v-for="kawasan in uniqueKawasanOptions" :key="kawasan" :value="kawasan">
-        {{ kawasan }}
-      </option>
-    </select>
+  <div class="p-5">
+    <h1 class="text-2xl font-semibold mb-4">Senarai Ahli</h1>
 
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Nama Ahli</th>
-          <th>No Ahli</th>
-          <th>No Kad Pengenalan</th>
-          <th>Kawasan</th>
-          <th>Alamat</th>
-          <th>No Tel</th>
-          <th>Yuran 2021</th>
-          <th>Yuran 2022</th>
-          <th>Yuran 2023</th>
-          <th>Yuran 2024</th>
-          <th>Yuran 2025</th>
-          <th>Yuran 2026</th>
-          <th>Yuran 2027</th>
-          <th>Yuran 2028</th>
-          <th>Yuran 2029</th>
-          <th>Yuran 2030</th>
-          <th>Yuran 2031</th>
-          <th>Yuran 2032</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="invoice in filteredInvoices" :key="invoice.id">
-          <td>{{ invoice.namaAhli }}</td>
-          <td>{{ invoice.noAhli }}</td>
-          <td>{{ invoice.noKadPengenalan }}</td>
-          <td>{{ invoice.kawasan }}</td>
-          <td>{{ invoice.alamat }}</td>
-          <td>{{ invoice.noTel }}</td>
-          <td>{{ invoice.yuran2021 }}</td>
-          <td>{{ invoice.yuran2022 }}</td>
-          <td>{{ invoice.yuran2023 }}</td>
-          <td>{{ invoice.yuran2024 }}</td>
-          <td>{{ invoice.yuran2025 }}</td>
-          <td>{{ invoice.yuran2026 }}</td>
-          <td>{{ invoice.yuran2027 }}</td>
-          <td>{{ invoice.yuran2028 }}</td>
-          <td>{{ invoice.yuran2029 }}</td>
-          <td>{{ invoice.yuran2030 }}</td>
-          <td>{{ invoice.yuran2031 }}</td>
-          <td>{{ invoice.yuran2032 }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="mb-4">
+      <Dropdown 
+        v-model="selectedKawasan" 
+        :options="uniqueKawasanOptions" 
+        placeholder="Pilih Kawasan" 
+        class="w-full md:w-60" 
+        filter
+      />
+    </div>
+
+    <DataTable :value="filteredInvoices" paginator :rows="10" class="p-datatable-sm shadow-md">
+      <Column field="namaAhli" header="Nama Ahli" sortable></Column>
+      <Column field="noAhli" header="No Ahli" sortable></Column>
+      <Column field="noKadPengenalan" header="No Kad Pengenalan"></Column>
+      <Column field="kawasan" header="Kawasan" sortable></Column>
+      <Column field="alamat" header="Alamat"></Column>
+      <Column field="noTel" header="No Tel"></Column>
+      <Column field="yuran2021" header="Yuran 2021"></Column>
+      <Column field="yuran2022" header="Yuran 2022"></Column>
+      <Column field="yuran2023" header="Yuran 2023"></Column>
+      <Column field="yuran2024" header="Yuran 2024"></Column>
+      <Column field="yuran2025" header="Yuran 2025"></Column>
+      <Column field="yuran2026" header="Yuran 2026"></Column>
+      <Column field="yuran2027" header="Yuran 2027"></Column>
+      <Column field="yuran2028" header="Yuran 2028"></Column>
+      <Column field="yuran2029" header="Yuran 2029"></Column>
+      <Column field="yuran2030" header="Yuran 2030"></Column>
+      <Column field="yuran2031" header="Yuran 2031"></Column>
+      <Column field="yuran2032" header="Yuran 2032"></Column>
+    </DataTable>
   </div>
 </template>
