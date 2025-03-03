@@ -7,6 +7,7 @@ import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Toast from "primevue/toast";
+import { useRouter } from "vue-router";
 
 const toast = useToast();
 const members = ref([]);
@@ -14,6 +15,7 @@ const selectedMember = ref(null);
 const year = ref("");
 const amount = ref("");
 const isLoading = ref(false);
+const router = useRouter();
 
 onMounted(async () => {
   try {
@@ -49,13 +51,17 @@ const addInvoice = async () => {
     isLoading.value = false;
   }
 };
+
+const navigateToAdminDashboard = () => {
+  router.push("/admin-dashboard");
+};
 </script>
 
 <template>
   <div class="form-container">
     <Card class="form-card">
       <template #title>
-        <h1 class="text-2xl font-bold text-primary">Kemaskini Yuran Ahli</h1>
+        <h1 class="text-2xl font-bold text-primary">Bayaran Yuran Ahli</h1>
       </template>
 
       <template #content>
@@ -77,7 +83,7 @@ const addInvoice = async () => {
           <InputText v-model="amount" placeholder="Masukkan Jumlah" class="p-inputtext-lg w-full" />
 
           <Button 
-            :label="isLoading ? 'Mengemaskini...' : 'Kemaskini Yuran'" 
+            :label="isLoading ? 'Mengemaskini...' : 'Bayar Yuran'" 
             icon="pi pi-file" 
             class="p-button-primary w-full mt-3" 
             :disabled="isLoading" 
@@ -87,6 +93,11 @@ const addInvoice = async () => {
       </template>
     </Card>
 
+    <!-- Home Button -->
+    <div class="home-button-container">
+      <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left" @click="navigateToAdminDashboard" />
+    </div>
+
     <Toast />
   </div>
 </template>
@@ -94,6 +105,7 @@ const addInvoice = async () => {
 <style scoped>
 .form-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -105,5 +117,10 @@ const addInvoice = async () => {
   padding: 1.5rem;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.home-button-container {
+  margin-top: 10px;
+  width: 450px;
 }
 </style>

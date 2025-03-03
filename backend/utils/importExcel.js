@@ -53,6 +53,7 @@ async function importExcel(filePath) {
         alamat: row.alamat,
         kawasan: row.kawasan,
         noTel: String(row.noTel),
+        yuranDaftar: 0,
         yuran2021: row.yuran2021,
         yuran2022: row.yuran2022,
         yuran2023: row.yuran2023,
@@ -68,14 +69,25 @@ async function importExcel(filePath) {
       },
     });
 
-    await prisma.user.create({
-      data: {
-        username: row.namaAhli,
-        icNumber: String(row.noKadPengenalan),
-        password: "password", // Default password (admin should change it)
-        role: "user",
-      },
-    });
+    if (row.namaAhli === "Arbain b Ramli") {
+      await prisma.user.create({
+        data: {
+          username: "ADMIN",
+          icNumber: String(row.noKadPengenalan),
+          password: "$2b$10$bx2fwPnmxR8e3fDuCKDlTePAyvsUJZOhGCqrKiYzfa6zl8AkmRebG",
+          role: "admin"
+        },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          username: row.namaAhli,
+          icNumber: String(row.noKadPengenalan),
+          password: "password",
+          role: "user"
+        },
+      });
+    }
 
     console.log(`Row ${i + 1} inserted successfully!`);
   }

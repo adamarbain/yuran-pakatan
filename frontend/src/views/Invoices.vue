@@ -5,10 +5,12 @@ import { useToast } from "primevue/usetoast";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Toast from "primevue/toast";
+import { useRouter } from "vue-router";
 
 const invoices = ref([]);
 const yearRange = ref([]);
 const toast = useToast();
+const router = useRouter();
 
 onMounted(async () => {
   const userId = localStorage.getItem("userId");
@@ -24,7 +26,7 @@ onMounted(async () => {
     if (invoices.value.length > 0) {
       const firstUser = invoices.value[0];
       yearRange.value = Object.keys(firstUser)
-        .filter((key) => key.startsWith("yuran"))
+        .filter((key) => key.startsWith("yuran") && firstUser[key] > 0)
         .map((key) => key.replace("yuran", ""));
     }
   } catch (error) {
@@ -69,13 +71,17 @@ const printInvoice = async (user, year) => {
     toast.add({ severity: "warn", summary: "No Payment", detail: `No payment recorded for ${user.namaAhli} in ${year}.`, life: 3000 });
   }
 };
+
+const navigateHome = () => {
+  router.push("/");
+};
 </script>
 
 <template>
   <div class="p-1">
     <Toast />
     <Card class="invoice-card">
-      <template #title class="label text-3xl">Sejarah Yuran</template>
+      <template #title class="label text-3xl">Ringkasan Yuran PAKATAN</template>
       <template #content>
         <div v-if="invoices.length > 0" class="invoice-list">
           <div v-for="(invoice, index) in invoices" :key="index" class="invoice-card-item">
@@ -103,8 +109,14 @@ const printInvoice = async (user, year) => {
         <p v-else>No invoices found.</p>
       </template>
     </Card>
+
+    <!-- New Home Button -->
+    <div class="home-button-container">
+      <Button label="Kembali ke Laman Utama" class="p-button-secondary" icon="pi pi-arrow-left" @click="navigateHome" />
+    </div>
   </div>
 </template>
+
 
 
 <style scoped>
@@ -161,5 +173,11 @@ const printInvoice = async (user, year) => {
 
 *{
   font-family: 'inter', sans-serif;
+}
+
+.home-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>

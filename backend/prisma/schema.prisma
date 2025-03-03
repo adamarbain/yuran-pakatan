@@ -14,31 +14,45 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  username String    @unique
-  password String
-  role     String    // "admin" or "user"
-  icNumber String    @unique
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String // "admin" or "user"
+  icNumber  String   @unique
+  infaqs    Infaq[] // Relation field
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Yuran {
-  id            Int     @id @default(autoincrement())
-  namaAhli      String
-  noAhli        String
-  noKadPengenalan String @unique
-  alamat        String
-  kawasan       String
-  noTel         String
-  yuran2021     Int?
-  yuran2022     Int?
-  yuran2023     Int?
-  yuran2024     Int?
-  yuran2025     Int?
-  yuran2026     Int?
-  yuran2027     Int?
-  yuran2028     Int?
-  yuran2029     Int?
-  yuran2030     Int?
-  yuran2031     Int?
-  yuran2032     Int?
+  id              Int      @id @default(autoincrement())
+  namaAhli        String
+  noAhli          String
+  noKadPengenalan String   @unique
+  alamat          String
+  kawasan         String
+  noTel           String
+  yuranDaftar     Int?
+  yuran2021       Int?
+  yuran2022       Int?
+  yuran2023       Int?
+  yuran2024       Int?
+  yuran2025       Int?
+  yuran2026       Int?
+  yuran2027       Int?
+  yuran2028       Int?
+  yuran2029       Int?
+  yuran2030       Int?
+  yuran2031       Int?
+  yuran2032       Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Infaq {
+  id     String   @id @default(uuid())
+  amount Float
+  date   DateTime @default(now())
+  userId String // Foreign key
+  user   User     @relation(fields: [userId], references: [id])
 }

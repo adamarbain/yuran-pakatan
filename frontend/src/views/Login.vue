@@ -14,7 +14,7 @@ const userType = ref("user");
 
 const userOptions = [
   { label: "Ahli Biasa", value: "user" },
-  { label: "Ahli Admin", value: "admin" },
+  { label: "Admin", value: "admin" },
 ];
 
 const login = async () => {
@@ -42,12 +42,12 @@ const login = async () => {
 <template>
   <div class="flex justify-center items-center min-h-screen p-4">
     <div class="surface-card p-5 shadow-2 border-round w-full max-w-md">
-      <h2 class="text-center mb-4">Yuran Persatuan Kebajikan Am Taman Meru (PAKATAN)</h2>
+      <h2 class="text-center mb-4">Persatuan Kebajikan Am Taman Meru (PAKATAN)</h2>
 
       <!-- Add text below the title -->
       <p class="text-center mb-4">Sila Masukkan No Kad Pengenalan untuk Memeriksa Status Yuran Tahunan</p>
-      
-      
+
+
 
       <Toast />
 
@@ -58,7 +58,8 @@ const login = async () => {
 
       <div v-if="userType === 'user'" class="mb-4">
         <label class="block mb-2">No Kad Pengenalan</label>
-        <InputText v-model="icNumber" class="w-full p-inputtext-lg" placeholder="Masukkan No Kad Pengenalan" />
+        <InputText v-model="icNumber" class="w-full p-inputtext-lg" placeholder="e.g. 0123456-08-0012" />
+        <small class="text-gray-500">*Sila Masukkan No Kad Pengenalan Termasuk Simbol (-)</small>
       </div>
 
       <div v-else>
@@ -72,7 +73,8 @@ const login = async () => {
         </div>
       </div>
 
-      <Button label="Log Masuk" class="w-full p-button-lg font-bold" @click="login" />
+      <Button label="Log Masuk" raised icon="pi pi-sign-in" :loading="loading" class="w-full p-button-lg font-bold"
+        @click="login" />
     </div>
   </div>
 </template>

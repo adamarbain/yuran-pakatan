@@ -46,4 +46,10 @@ router.post("/admin-login", async (req, res) => {
   res.json({ success: true, message: "Login successful", userId: user.id, token });
 });
 
+// Fetch all users
+router.get("/users", async (req, res) => {
+  const users = await prisma.user.findMany();
+  res.json(users);
+});
+
 module.exports = router;

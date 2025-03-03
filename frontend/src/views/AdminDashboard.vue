@@ -4,6 +4,12 @@ import { useRouter } from "vue-router";
 import Card from "primevue/card";
 import Button from "primevue/button";
 
+const router = useRouter();
+
+const navigateHome = () => {
+  router.push("/");
+};
+
 </script>
 
 
@@ -22,10 +28,16 @@ import Button from "primevue/button";
             @click="$router.push('/add-member')" 
           />
           <Button 
-            label="Kemaskini Yuran Ahli" 
+            label="Bayaran Yuran Ahli" 
             icon="pi pi-file" 
             class="w-full p-button-secondary" 
             @click="$router.push('/add-invoice')" 
+          />
+          <Button 
+            label="Bayaran Infaq Ahli" 
+            icon="pi pi-dollar" 
+            class="w-full p-button-secondary" 
+            @click="$router.push('/add-infaq')" 
           />
           <Button 
             label="Senarai Yuran Ahli" 
@@ -33,6 +45,11 @@ import Button from "primevue/button";
             class="w-full p-button-success" 
             @click="$router.push('/view-invoices')" 
           />
+        </div>
+        
+        <!-- Home Button -->
+        <div class="home-button-container">
+          <Button label="Kembali ke Laman Utama" class="p-button-secondary w-full" icon="pi pi-arrow-left" @click="navigateHome" />
         </div>
       </template>
     </Card>
@@ -53,6 +70,12 @@ import Button from "primevue/button";
   padding: 1.5rem;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.home-button-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
 }
 </style>
   

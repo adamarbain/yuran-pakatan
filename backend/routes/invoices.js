@@ -20,7 +20,7 @@ router.get("/:ic", async (req, res) => {
 
 // post new invoice
 router.post("/", async (req, res) => {
-  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat } = req.body;
+  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat, yuranDaftar } = req.body;
   const invoice = await prisma.yuran.create({
     data: {
       noKadPengenalan,
@@ -29,6 +29,7 @@ router.post("/", async (req, res) => {
       kawasan,
       noTel,
       alamat,
+      yuranDaftar: Number(yuranDaftar),
     },
   });
 
