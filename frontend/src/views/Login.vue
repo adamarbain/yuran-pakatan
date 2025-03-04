@@ -67,12 +67,14 @@ const login = async () => {
         Persatuan Kebajikan Am Taman Meru (PAKATAN)
       </h2>
 
-      <!-- Add text below the title -->
       <p class="text-center mb-4">
         Sila Masukkan No Kad Pengenalan untuk Memeriksa Status Yuran Tahunan
       </p>
 
-      <Toast position="top-right" />
+      <!-- Toast with pt prop -->
+      <Toast
+        position="top-right"
+      />
 
       <div class="mb-4">
         <label class="block mb-2">Jenis Pengguna</label>
@@ -92,9 +94,9 @@ const login = async () => {
           class="w-full p-inputtext-lg"
           placeholder="e.g. 0123456-08-0012"
         />
-        <small class="text-gray-500"
-          >*Sila Masukkan No Kad Pengenalan Termasuk Simbol (-)</small
-        >
+        <small class="text-gray-500">
+          *Sila Masukkan No Kad Pengenalan Termasuk Simbol (-)
+        </small>
       </div>
 
       <div v-else>

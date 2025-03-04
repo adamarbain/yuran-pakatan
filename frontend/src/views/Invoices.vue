@@ -54,6 +54,7 @@ onMounted(async () => {
 
 const printInvoice = async (user, year) => {
   const amount = user[`yuran${year}`];
+  const kaedahBayaranValue = user[`kaedahBayaran${year}`];
   if (amount > 0) {
     try {
       const invoiceData = {
@@ -63,6 +64,9 @@ const printInvoice = async (user, year) => {
         tarikh: new Date().toLocaleDateString("ms-MY"),
         jumlah: amount,
         tahun: year,
+        noKadPengenalan: user.noKadPengenalan,
+        noTel: user.noTel,
+        kaedahBayaran: kaedahBayaranValue,
       };
 
       const response = await axios.post(
