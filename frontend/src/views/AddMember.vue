@@ -18,28 +18,34 @@ const memberData = ref({
   kawasan: "",
   noTel: "",
   yuranDaftar: null,
+  kaedahBayaranDaftar: "",
 });
 
 const isLoading = ref(false);
 
 const addMember = async () => {
   if (!memberData.value.namaAhli || !memberData.value.noAhli || !memberData.value.noKadPengenalan) {
-    toast.add({ severity: "warn", summary: "Validation Error", detail: "Please fill in all required fields.", life: 3000 });
+    toast.add({ severity: "warn", summary: "Peringatan", detail: "Sila isi semua maklumat.", life: 3000 });
     return;
   }
 
   try {
     isLoading.value = true;
     await axios.post("http://localhost:5000/api/invoices", memberData.value);
-    toast.add({ severity: "success", summary: "Success", detail: "Member added successfully!", life: 3000 });
+    toast.add({ severity: "success", summary: "Berjaya", detail: "Pendaftaran Berjaya!", life: 3000 });
 
     // Reset form
     Object.keys(memberData.value).forEach((key) => (memberData.value[key] = ""));
+
+    // Delay navigation to allow toast to display
+    setTimeout(() => {
+      router.push("/admin-dashboard");
+    }, 2000);
+
   } catch (error) {
-    toast.add({ severity: "error", summary: "Error", detail: "Failed to add member.", life: 3000 });
+    toast.add({ severity: "error", summary: "Gagal", detail: "Pendaftaran Gagal.", life: 3000 });
   } finally {
     isLoading.value = false;
-    router.push("/admin-dashboard");
   }
 };
 
@@ -61,13 +67,21 @@ const navigateHome = () => {
   router.push("/admin-dashboard");
 };
 
+const paymentMethods = [
+  { label: "Tunai kepada AJK", value: "Tunai" },
+  { label: "Deposit Tunai", value: "CDM" },
+  { label: "Pemindahan Bank dalam Talian", value: "Online Transfer" },
+  { label: "Kod QR", value: "QR Code" },
+];
+
 </script>
 
 <template>
   <div class="form-container">
+    <Toast position="top-right" />
     <Card class="form-card">
       <template #title>
-        <h1 class="text-2xl font-bold text-primary">Daftar Ahli PAKATAN Baru</h1>
+        <h1 class="text-2xl font-bold text-primary text-center">Daftar Ahli PAKATAN Baru</h1>
       </template>
 
       <template #content>
@@ -94,6 +108,9 @@ const navigateHome = () => {
           <label>Yuran Pendaftaran</label>
           <InputText v-model="memberData.yuranDaftar" placeholder="Masukkan Yuran Pendaftaran" class="p-inputtext-lg w-full" type="number" />
 
+          <label>Kaedah Pembayaran</label>
+          <Dropdown v-model="memberData.kaedahBayaranDaftar" :options="paymentMethods" optionLabel="label" optionValue="value"  placeholder="Pilih Kaedah Bayaran" class="p-inputtext-lg w-full" />
+
           <Button 
             :label="isLoading ? 'Adding...' : 'Daftar Ahli Baru'" 
             icon="pi pi-user-plus" 
@@ -109,8 +126,6 @@ const navigateHome = () => {
     <div class="home-button-container">
       <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left" @click="navigateHome" />
     </div>
-
-    <Toast />
   </div>
 </template>
 
@@ -120,21 +135,44 @@ const navigateHome = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 1rem;
   background-color: var(--color-background-soft);
 }
 
+/* Make form card responsive */
 .form-card {
-  width: 450px;
-  max-height: 80vh; /* Set maximum height */
-  padding: 0.5rem;
+  width: 100%;
+  max-width: 450px;
+  min-width: 300px;
+  padding: 1rem;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-y: auto;
+}
+
+/* Adjustments for small screens */
+@media (max-width: 480px) {
+  .form-card {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .form-container {
+    padding: 0.5rem;
+  }
 }
 
 .home-button-container {
   margin-top: 10px;
-  width: 450px;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.p-toast {
+  max-width: 400px !important;
+  width: auto !important;
 }
 </style>
+

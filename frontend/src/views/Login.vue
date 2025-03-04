@@ -49,7 +49,7 @@ const login = async () => {
 
 
 
-      <Toast />
+      <Toast position="top-right"/>
 
       <div class="mb-4">
         <label class="block mb-2">Jenis Pengguna</label>
@@ -82,5 +82,9 @@ const login = async () => {
 <style>
 *{
   font-family: 'inter', sans-serif;
+}
+.p-toast {
+  max-width: 400px !important;
+  width: auto !important;
 }
 </style>

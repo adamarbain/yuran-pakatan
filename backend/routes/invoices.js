@@ -20,7 +20,7 @@ router.get("/:ic", async (req, res) => {
 
 // post new invoice
 router.post("/", async (req, res) => {
-  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat, yuranDaftar } = req.body;
+  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat, yuranDaftar, kaedahBayaranDaftar } = req.body;
   const invoice = await prisma.yuran.create({
     data: {
       noKadPengenalan,
@@ -30,6 +30,7 @@ router.post("/", async (req, res) => {
       noTel,
       alamat,
       yuranDaftar: Number(yuranDaftar),
+      kaedahBayaranDaftar,
     },
   });
 
@@ -48,7 +49,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { year, amount } = req.body; // year is like "yuran2024
+  const { year, amount, kaedahBayaran } = req.body; // year is like "yuran2024
   
   console.log("Updating Yuran:", { id, year, amount });
 
@@ -61,9 +62,19 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ error: "Yuran record not found" });
     }
 
+    // year is "yuran2024"
+    // create a new const called tahunYuran and assign it to "2024"
+    const tahunYuran = year.slice(5);
+
+    const yearlyPaymentMethod = "kaedahBayaran" + tahunYuran;
+    console.log("Tahun Kaedah Bayaran: ", { yearlyPaymentMethod });
+
     await prisma.yuran.update({
       where: { id: Number(id) },
-      data: { [year]: Number(amount) },
+      data: { 
+        [year]: Number(amount),
+        [yearlyPaymentMethod]: kaedahBayaran,
+      },
     });
 
     res.json({ message: "Invoice updated successfully" });
