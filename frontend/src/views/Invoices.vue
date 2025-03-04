@@ -6,11 +6,16 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import Toast from "primevue/toast";
 import { useRouter } from "vue-router";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 
 const invoices = ref([]);
+const InfaqUser = ref([]);
 const yearRange = ref([]);
+const infaqs = ref([]);
 const toast = useToast();
 const router = useRouter();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 onMounted(async () => {
   const userId = localStorage.getItem("userId");
@@ -20,7 +25,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/invoices/${userId}`);
+    const response = await axios.get(`${API_BASE_URL}/api/invoices/${userId}`);
     invoices.value = response.data;
 
     if (invoices.value.length > 0) {
@@ -31,6 +36,19 @@ onMounted(async () => {
     }
   } catch (error) {
     toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch invoices.", life: 3000 });
+  }
+
+  try {
+    const icNumber = userId; // Get user's IC number from local storage
+    const response = await axios.get(`${API_BASE_URL}/api/infaq/${icNumber}`);
+
+    if (response.data) {
+      InfaqUser.value = [response.data]; // Store user details
+      infaqs.value = response.data.infaqs || []; // Store user's infaq
+    }
+  } catch (error) {
+    console.error("Error fetching user infaq:", error);
+    toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch data", life: 3000 });
   }
 });
 
@@ -48,7 +66,7 @@ const printInvoice = async (user, year) => {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/invoices/generate-invoice",
+        `${API_BASE_URL}/api/invoices/generate-invoice`,
         invoiceData,
         { responseType: "blob" }
       );
@@ -63,9 +81,9 @@ const printInvoice = async (user, year) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.add({ severity: "success", summary: "Success", detail: "Invoice downloaded.", life: 3000 });
+      toast.add({ severity: "success", summary: "Berjaya", detail: "Cetakan Resit Berjaya.", life: 3000 });
     } catch (error) {
-      toast.add({ severity: "error", summary: "Error", detail: "Failed to generate invoice PDF.", life: 3000 });
+      toast.add({ severity: "error", summary: "Gagal", detail: "Cetakan Resit Gagal.", life: 3000 });
     }
   } else {
     toast.add({ severity: "warn", summary: "No Payment", detail: `No payment recorded for ${user.namaAhli} in ${year}.`, life: 3000 });
@@ -78,8 +96,8 @@ const navigateHome = () => {
 </script>
 
 <template>
-  <div class="p-1">
-    <Toast />
+  <div class="p-2">
+    <Toast position="top-right" />
     <Card class="invoice-card">
       <template #title class="label text-3xl">Ringkasan Yuran PAKATAN</template>
       <template #content>
@@ -110,13 +128,28 @@ const navigateHome = () => {
       </template>
     </Card>
 
-    <!-- New Home Button -->
+    <!-- Infaq DataTable -->
+    <Card class="mt-4 invoice-card">
+      <template #title>Senarai Infaq</template>
+      <template #content>
+        <DataTable :value="infaqs" paginator :rows="5" class="p-datatable-sm shadow-md mt-2">
+          <Column field="date" header="Tarikh" sortable>
+            <template #body="slotProps">
+              {{ new Date(slotProps.data.date).toLocaleDateString("en-MY") }}
+            </template>
+          </Column>
+          <Column field="amount" header="Jumlah (RM)" sortable></Column>
+          <Column field="kaedahBayaranInfaq" header="Kaedah Bayaran" sortable></Column>
+        </DataTable>
+      </template>
+    </Card>
+
+    <!-- Home Button -->
     <div class="home-button-container">
       <Button label="Kembali ke Laman Utama" class="p-button-secondary" icon="pi pi-arrow-left" @click="navigateHome" />
     </div>
   </div>
 </template>
-
 
 
 <style scoped>

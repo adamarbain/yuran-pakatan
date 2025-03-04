@@ -8,16 +8,9 @@ router.get("/", async (req, res) => {
     res.json(infaq);
 });
 
-router.get("/:userId", async (req, res) => {
-    const infaq = await prisma.infaq.findMany({
-        where: { noKadPengenalan: req.params.userId },
-    });
-    res.json(infaq);
-});
-
 // Create New Infaq
 router.post("/", async (req, res) => {
-    const { userId, amount } = req.body;
+    const { userId, amount, kaedahBayaranInfaq } = req.body;
     // console.log(req.body);
     const infaq = await prisma.infaq.create({
         data: {
@@ -25,6 +18,7 @@ router.post("/", async (req, res) => {
                 connect: { icNumber: userId },
             },
             amount,
+            kaedahBayaranInfaq,
         },
     });
     res.json(infaq);
@@ -33,13 +27,23 @@ router.post("/", async (req, res) => {
 // Fetch a user's infaq
 router.get("/:userId", async (req, res) => {
     const userwithinfaq = await prisma.user.findUnique({
-        where: { userId: req.params.userId },
+        where: { icNumber: req.params.userId },
         include: {
-            infaq: true,
+            infaqs: true,
         },
     });
     console.log(userwithinfaq);
     res.json(userwithinfaq);
+});
+
+// fetch all user infaq
+router.get("/alluser/infaq", async (req, res) => {
+    const infaq = await prisma.infaq.findMany({
+        include: {
+            user: true,
+        },
+    });
+    res.json(infaq);
 });
 
 module.exports = router;

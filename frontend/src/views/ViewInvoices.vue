@@ -9,15 +9,30 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useRouter } from "vue-router";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 
 const invoices = ref([]);
 const selectedKawasan = ref("");
 const router = useRouter();
+const toast = useToast();
+const infaqList = ref([]);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 onMounted(async () => {
-  const response = await axios.get("http://localhost:5000/api/invoices");
+  const response = await axios.get(`${API_BASE_URL}/api/invoices`);
   invoices.value = response.data;
-  console.log("Invoices: ", invoices.value);
+  // console.log("Invoices: ", invoices.value);
+
+  // Fetch infaq data from backend
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/infaq/alluser/infaq`);
+    infaqList.value = response.data;
+    // console.log("Infaq data: ", infaqList.value);
+  } catch (error) {
+    console.error("Error fetching infaq data:", error);
+    toast.add({ severity: "error", summary: "Error", detail: "Gagal memuatkan data infaq.", life: 3000 });
+  }
 });
 
 // Get unique kawasan values
@@ -38,6 +53,11 @@ const exportToXlsx = () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");
   XLSX.writeFile(workbook, "Senarai Ahli PAKATAN.xlsx");
+  toast.add({
+    severity: "success",
+    summary: "Exported to Excel",
+    life: 3000,
+  });
 };
 
 const exportToPdf = () => {
@@ -115,7 +135,25 @@ const exportToPdf = () => {
   });
 
   doc.save("Senarai Ahli PAKATAN.pdf");
+
+  toast.add({
+    severity: "success",
+    summary: "PDF Exported",
+    life: 5000,
+  });
 };
+
+// Format the data for display
+const formattedInfaqList = computed(() => {
+  return infaqList.value.map((item) => ({
+    id: item.id,
+    namaAhli: item.user.username,
+    noKadPengenalan: item.user.icNumber,
+    amount: item.amount,
+    kaedahBayaran: item.kaedahBayaranInfaq,
+    tarikh: new Date(item.date).toLocaleDateString("ms-MY"), // Format date
+  }));
+});
 
 const navigateToAdminDashboard = () => {
   router.push("/admin-dashboard");
@@ -125,7 +163,8 @@ const navigateToAdminDashboard = () => {
 <template>
   <div class="p-5">
     <h1 class="text-2xl font-semibold mb-4">Senarai Ahli PAKATAN</h1>
-
+    <Toast position="top-right" />
+    
     <div class="mb-4 flex gap-3">
       <Dropdown 
         v-model="selectedKawasan" 
@@ -138,7 +177,8 @@ const navigateToAdminDashboard = () => {
       <Button @click="exportToPdf" class="p-button-danger">Export PDF</Button>
     </div>
 
-    <DataTable :value="filteredInvoices" paginator :rows="10" class="p-datatable-sm shadow-md">
+    <!-- Member List DataTable -->
+    <DataTable :value="filteredInvoices" paginator :rows="10" class="p-datatable-sm shadow-md mb-6">
       <Column field="namaAhli" header="Nama Ahli" sortable></Column>
       <Column field="noAhli" header="No Ahli" sortable></Column>
       <Column field="noKadPengenalan" header="No Kad Pengenalan"></Column>
@@ -159,12 +199,23 @@ const navigateToAdminDashboard = () => {
       <Column field="yuran2032" header="Yuran 2032"></Column>
     </DataTable>
 
+    <!-- Infaq Contributions Table -->
+    <h1 class="text-2xl font-semibold my-4">Senarai Infaq</h1>
+    <DataTable :value="formattedInfaqList" paginator :rows="10" class="p-datatable-sm shadow-md">
+      <Column field="namaAhli" header="Nama Ahli" sortable></Column>
+      <Column field="noKadPengenalan" header="No Kad Pengenalan"></Column>
+      <Column field="amount" header="Jumlah Infaq (RM)" sortable></Column>
+      <Column field="kaedahBayaran" header="Kaedah Bayaran"></Column>
+      <Column field="tarikh" header="Tarikh Infaq"></Column>
+    </DataTable>
+
     <!-- Home Button -->
     <div class="home-button-container">
       <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left" @click="navigateToAdminDashboard" />
     </div>
   </div>
 </template>
+
 
 <style scoped>
 button {
@@ -186,5 +237,10 @@ button {
   margin-top: 10px;
   display: flex;
   justify-content: center;
+}
+
+.p-toast {
+  max-width: 400px !important;
+  width: auto !important;
 }
 </style>
