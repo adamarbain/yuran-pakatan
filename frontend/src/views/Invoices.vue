@@ -15,6 +15,7 @@ const yearRange = ref([]);
 const infaqs = ref([]);
 const toast = useToast();
 const router = useRouter();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 onMounted(async () => {
   const userId = localStorage.getItem("userId");
@@ -24,7 +25,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/invoices/${userId}`);
+    const response = await axios.get(`${API_BASE_URL}/api/invoices/${userId}`);
     invoices.value = response.data;
 
     if (invoices.value.length > 0) {
@@ -39,7 +40,7 @@ onMounted(async () => {
 
   try {
     const icNumber = userId; // Get user's IC number from local storage
-    const response = await axios.get(`http://localhost:5000/api/infaq/${icNumber}`);
+    const response = await axios.get(`${API_BASE_URL}/api/infaq/${icNumber}`);
 
     if (response.data) {
       InfaqUser.value = [response.data]; // Store user details
@@ -65,7 +66,7 @@ const printInvoice = async (user, year) => {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/invoices/generate-invoice",
+        `${API_BASE_URL}/api/invoices/generate-invoice`,
         invoiceData,
         { responseType: "blob" }
       );

@@ -16,11 +16,12 @@ const infaqAmount = ref(null);
 const paymentMethod = ref("");
 const toast = useToast();
 const isLoading = ref(false);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch users on mount
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:5000/api/invoices");
+    const response = await axios.get(`${API_BASE_URL}/api/invoices`);
     users.value = response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -36,7 +37,7 @@ const submitInfaq = async () => {
 
   try {
     isLoading.value = true;
-    await axios.post("http://localhost:5000/api/infaq", {
+    await axios.post(`${API_BASE_URL}/api/infaq`, {
       userId: selectedUser.value.noKadPengenalan,
       amount: infaqAmount.value,
       kaedahBayaranInfaq: paymentMethod.value,

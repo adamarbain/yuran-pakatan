@@ -17,15 +17,16 @@ const selectedKawasan = ref("");
 const router = useRouter();
 const toast = useToast();
 const infaqList = ref([]);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 onMounted(async () => {
-  const response = await axios.get("http://localhost:5000/api/invoices");
+  const response = await axios.get(`${API_BASE_URL}/api/invoices`);
   invoices.value = response.data;
   // console.log("Invoices: ", invoices.value);
 
   // Fetch infaq data from backend
   try {
-    const response = await axios.get("http://localhost:5000/api/infaq/alluser/infaq");
+    const response = await axios.get(`${API_BASE_URL}/api/infaq/alluser/infaq`);
     infaqList.value = response.data;
     // console.log("Infaq data: ", infaqList.value);
   } catch (error) {
