@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const router = express.Router();
 const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
 // Admin: Get all invoices
 router.get("/", async (req, res) => {
@@ -86,14 +87,14 @@ router.put("/:id", async (req, res) => {
 
 router.post("/generate-invoice", async (req, res) => {
   try {
-    const { namaAhli, noAhli, alamat, tarikh, jumlah, tahun } = req.body;
+    const { namaAhli, noAhli, alamat, tarikh, jumlah, tahun, noKadPengenalan, noTel, kaedahBayaran } = req.body;
 
-    if (!namaAhli || !noAhli || !alamat || !tarikh || !jumlah || !tahun) {
+    if (!namaAhli || !noAhli || !alamat || !tarikh || !jumlah || !tahun || !noKadPengenalan || !noTel) {
       return res.status(400).json({ error: "Missing required invoice fields" });
     }
 
-    // Create PDF
-    const doc = new PDFDocument();
+    // Create PDF Document
+    const doc = new PDFDocument({ margin: 50 });
     let buffers = [];
 
     doc.on("data", (chunk) => buffers.push(chunk));
@@ -106,21 +107,121 @@ router.post("/generate-invoice", async (req, res) => {
       res.send(pdfData);
     });
 
-    // Invoice content
-    doc.fontSize(16).text("RESIT YURAN PAKATAN", { align: "center" }).moveDown(2);
-    doc.fontSize(12).text(`Nama Ahli: ${namaAhli}`);
-    doc.text(`No Ahli: ${noAhli}`);
-    doc.text(`Alamat: ${alamat}`);
-    doc.text(`Tarikh: ${tarikh}`);
-    doc.text(`Tahun: ${tahun}`);
-    doc.text(`Jumlah: RM ${jumlah.toFixed(2)}`).moveDown(2);
-    doc.text("Terima kasih atas pembayaran anda!", { align: "center" });
+    // Add Logo at Top Center
+    const logoPath = "logo.png"; // Update with actual logo path
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, doc.page.width / 2 - 50, 30, { width: 100 });
+    }
+    doc.moveDown(3); // Adjust spacing after logo
+    
+    // Header Section
+    doc
+      .fontSize(20)
+      .fillColor("#333")
+      .text("RESIT YURAN PAKATAN", { align: "center" })
+      .moveDown(0.5);
 
+    doc
+      .fontSize(14)
+      .fillColor("#666")
+      .text("Persatuan Kebajikan Am Taman Meru (PAKATAN)", { align: "center" })
+      .moveDown(2);
+
+    // Member Details Section
+    doc
+      .fontSize(12)
+      .fillColor("#333")
+      .text("Maklumat Ahli", { underline: true })
+      .moveDown(0.5);
+    
+    doc
+      .font("Helvetica-Bold")
+      .text(`Nama Ahli:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${namaAhli}`);
+    doc
+      .font("Helvetica-Bold")
+      .text(`No Ahli:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${noAhli}`);
+
+      doc
+      .font("Helvetica-Bold")
+      .text(`No Kad Pengenalan:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${noKadPengenalan}`)
+
+    doc
+      .font("Helvetica-Bold")
+      .text(`Alamat:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${alamat}`)
+
+      doc
+      .font("Helvetica-Bold")
+      .text(`No Telefon:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${noTel}`)
+      .moveDown(1);
+    
+
+    // Payment Details
+    doc
+      .fontSize(12)
+      .fillColor("#333")
+      .text("Maklumat Pembayaran", { underline: true })
+      .moveDown(0.5);
+
+    doc
+      .font("Helvetica-Bold")
+      .text(`Tarikh:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${tarikh}`);
+    doc
+      .font("Helvetica-Bold")
+      .text(`Tahun:`, { continued: true })
+      .font("Helvetica")
+      .text(` ${tahun}`);
+    doc
+      .font("Helvetica-Bold")
+      .text(`Jumlah:`, { continued: true })
+      .font("Helvetica")
+      .text(` RM ${jumlah.toFixed(2)}`);
+      
+    if (kaedahBayaran) {
+      doc
+        .font("Helvetica-Bold")
+        .text(`Kaedah Pembayaran:`, { continued: true })
+        .font("Helvetica")
+        .text(` ${kaedahBayaran}`)
+        .moveDown(20);
+    } else {
+      doc.moveDown(21);
+    }
+
+    // Thank You Note
+    doc
+      .fontSize(12)
+      .fillColor("#40c057") // Green color
+      .text("Terima kasih atas pembayaran anda!", { align: "center" })
+      .moveDown(0.5);
+
+    // Footer
+    doc
+      .fontSize(10)
+      .fillColor("#999")
+      .text("Resit ini dijana secara automatik oleh sistem PAKATAN.", {
+        align: "center",
+      });
+
+    // End PDF
     doc.end();
   } catch (error) {
     console.error("Error generating invoice:", error);
     res.status(500).json({ error: "Failed to generate invoice PDF" });
   }
 });
+
+
 
 module.exports = router;

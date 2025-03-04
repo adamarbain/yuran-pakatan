@@ -54,6 +54,7 @@ onMounted(async () => {
 
 const printInvoice = async (user, year) => {
   const amount = user[`yuran${year}`];
+  const kaedahBayaranValue = user[`kaedahBayaran${year}`];
   if (amount > 0) {
     try {
       const invoiceData = {
@@ -63,6 +64,9 @@ const printInvoice = async (user, year) => {
         tarikh: new Date().toLocaleDateString("ms-MY"),
         jumlah: amount,
         tahun: year,
+        noKadPengenalan: user.noKadPengenalan,
+        noTel: user.noTel,
+        kaedahBayaran: kaedahBayaranValue,
       };
 
       const response = await axios.post(
@@ -96,13 +100,13 @@ const navigateHome = () => {
 </script>
 
 <template>
-  <div class="p-2">
+  <div class="p-1 surface-ground text-color">
     <Toast position="top-right" />
-    <Card class="invoice-card">
-      <template #title class="label text-3xl">Ringkasan Yuran PAKATAN</template>
+    <Card class="invoice-card surface-card shadow-2 border-round">
+      <template #title class="text-3xl font-bold">Ringkasan Yuran PAKATAN</template>
       <template #content>
         <div v-if="invoices.length > 0" class="invoice-list">
-          <div v-for="(invoice, index) in invoices" :key="index" class="invoice-card-item">
+          <div v-for="(invoice, index) in invoices" :key="index" class="invoice-card-item surface-border">
             <p><span class="label">Nama:</span> {{ invoice.namaAhli }}</p>
             <p><span class="label">No Ahli:</span> {{ invoice.noAhli }}</p>
             <p><span class="label">No Kad Pengenalan:</span> {{ invoice.noKadPengenalan }}</p>
@@ -110,17 +114,13 @@ const navigateHome = () => {
             <p><span class="label">Alamat:</span> {{ invoice.alamat }}</p>
             <p><span class="label">Kawasan:</span> {{ invoice.kawasan.toUpperCase() }}</p>
 
-            <div v-for="year in yearRange" :key="year" class="yuran-row">
-              <span class="yuran-label">Yuran {{ year }}:</span> 
-              <span class="yuran-amount">RM{{ invoice[`yuran${year}`] }}</span>
-                <Button 
-                v-if="invoice[`yuran${year}`] > 0" 
-                icon="pi pi-file-pdf"
-                class="w-4"
-                @click="printInvoice(invoice, year)"
-                >
+            <div v-for="year in yearRange" :key="year" class="yuran-row surface-border">
+              <span class="yuran-label">Yuran {{ year }}:</span>
+              <span class="yuran-amount text-green-500">RM{{ invoice[`yuran${year}`] }}</span>
+              <Button v-if="invoice[`yuran${year}`] > 0" icon="pi pi-file-pdf"
+                class="w-4" @click="printInvoice(invoice, year)">
                 Cetak Resit
-                </Button>
+              </Button>
             </div>
           </div>
         </div>
@@ -129,9 +129,9 @@ const navigateHome = () => {
     </Card>
 
     <!-- Infaq DataTable -->
-    <Card class="mt-4 invoice-card">
-      <template #title>Senarai Infaq</template>
-      <template #content>
+    <Card class="mt-4 invoice-card surface-card shadow-2 border-round">
+      <template #title class="text-xl font-bold">Senarai Infaq</template>
+      <template #content v-if="infaqs.length > 0">
         <DataTable :value="infaqs" paginator :rows="5" class="p-datatable-sm shadow-md mt-2">
           <Column field="date" header="Tarikh" sortable>
             <template #body="slotProps">
@@ -142,6 +142,9 @@ const navigateHome = () => {
           <Column field="kaedahBayaranInfaq" header="Kaedah Bayaran" sortable></Column>
         </DataTable>
       </template>
+      <template #content v-else>
+        <p>Rekod Infaq Tidak Dijumpai</p>
+      </template>
     </Card>
 
     <!-- Home Button -->
@@ -151,32 +154,21 @@ const navigateHome = () => {
   </div>
 </template>
 
-
 <style scoped>
 .invoice-card {
-  background: #1e1e1e;
-  padding: 5px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(255, 255, 255, 0.1);
+  padding: 1rem;
   max-width: 600px;
   margin: auto;
 }
 
 .invoice-card-item {
-  background: #292929;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding: 0.75rem;
   border-radius: 6px;
   margin-top: 10px;
-  box-shadow: 0px 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 .label {
   font-weight: bold;
-  color: #f0f0f0;
-  margin-top: 0px;
 }
 
 .yuran-row {
@@ -185,27 +177,12 @@ const navigateHome = () => {
   gap: 10px;
   margin-top: 5px;
   padding: 8px;
-  background: #333;
   border-radius: 4px;
 }
 
 .yuran-label {
   flex: 1;
   font-weight: bold;
-  color: #ddd;
-}
-
-.yuran-amount {
-  font-weight: bold;
-  color: #40c057; /* Green */
-}
-
-.yuran-button {
-  margin-left: auto;
-}
-
-*{
-  font-family: 'inter', sans-serif;
 }
 
 .home-button-container {
