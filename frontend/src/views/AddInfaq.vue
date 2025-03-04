@@ -6,16 +6,21 @@ import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
 import { useRouter } from "vue-router";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
 
 const router = useRouter();
 const users = ref([]);
 const selectedUser = ref(null);
 const infaqAmount = ref(null);
+const paymentMethod = ref("");
+const toast = useToast();
+const isLoading = ref(false);
 
 // Fetch users on mount
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:5000/api/auth/users");
+    const response = await axios.get("http://localhost:5000/api/invoices");
     users.value = response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -24,28 +29,50 @@ onMounted(async () => {
 
 // Submit infaq data
 const submitInfaq = async () => {
-  if (!selectedUser.value || !infaqAmount.value) {
-    alert("Sila pilih pengguna dan masukkan jumlah infaq.");
+  if (!selectedUser.value || !infaqAmount.value || !paymentMethod.value) {
+    toast.add({ severity: "warn", summary: "Peringatan", detail: "Sila isi semua maklumat.", life: 3000 });
     return;
   }
 
   try {
+    isLoading.value = true;
     await axios.post("http://localhost:5000/api/infaq", {
-      userId: selectedUser.value.icNumber,
+      userId: selectedUser.value.noKadPengenalan,
       amount: infaqAmount.value,
+      kaedahBayaranInfaq: paymentMethod.value,
     });
 
-    alert("Infaq berjaya dikemaskini!");
-    router.push("/admin-dashboard");
+    toast.add({ severity: "success", summary: "Berjaya", detail: "Bayaran Infaq berjaya!", life: 3000 });
+
+    // Reset form
+    selectedUser.value = null;
+    infaqAmount.value = null;
+    paymentMethod.value = "";
+
+    // Delay navigation to allow toast to display
+    setTimeout(() => {
+      router.push("/admin-dashboard");
+    }, 2000);
+
   } catch (error) {
     console.error("Error submitting infaq:", error);
-    alert("Gagal mengemaskini infaq.");
+    toast.add({ severity: "error", summary: "Gagal", detail: "Bayaran Infaq gagal.", life: 3000 });
+  } finally {
+    isLoading.value = false;
   }
 };
+
+const paymentMethods = [
+  { label: "Tunai kepada AJK", value: "Tunai" },
+  { label: "Deposit Tunai", value: "CDM" },
+  { label: "Pemindahan Bank dalam Talian", value: "Online Transfer" },
+  { label: "Kod QR", value: "QR Code" },
+];
 </script>
 
 <template>
   <div class="infaq-container">
+    <Toast position="top-right" />
     <Card class="infaq-card">
       <template #title>
         <h2 class="text-xl font-bold">Bayaran Infaq Ahli</h2>
@@ -56,7 +83,7 @@ const submitInfaq = async () => {
           <Dropdown 
             v-model="selectedUser" 
             :options="users" 
-            optionLabel="username" 
+            optionLabel="namaAhli" 
             placeholder="Pilih ahli"
             class="w-full mt-2"
             filter
@@ -68,8 +95,20 @@ const submitInfaq = async () => {
           <InputNumber v-model="infaqAmount" placeholder="Masukkan jumlah infaq" mode="currency" currency="MYR" class="w-full mt-2" />
         </div>
 
+        <div class="form-group">
+          <label>Kaedah Bayaran:</label>
+          <Dropdown 
+            v-model="paymentMethod" 
+            :options="paymentMethods" 
+            optionLabel="label" 
+            optionValue="value"
+            placeholder="Pilih kaedah bayaran"
+            class="w-full mt-2"
+          />
+        </div>
+
         <div class="button-group">
-          <Button label="Bayar" icon="pi pi-save" class="p-button-success w-full" @click="submitInfaq" />
+          <Button label="Bayar Infaq" icon="pi pi-save" class="p-button-success w-full" @click="submitInfaq" />
           <Button label="Kembali ke Laman Admin" icon="pi pi-arrow-left" class="p-button-secondary w-full mt-2" @click="router.push('/admin-dashboard')" />
         </div>
       </template>
@@ -99,5 +138,10 @@ const submitInfaq = async () => {
 
 .button-group {
   margin-top: 1rem;
+}
+
+.p-toast {
+  max-width: 400px !important;
+  width: auto !important;
 }
 </style>
