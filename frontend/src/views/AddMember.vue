@@ -9,6 +9,7 @@ import Button from "primevue/button";
 import router from "@/router";
 
 const toast = useToast();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const memberData = ref({
   namaAhli: "",
@@ -31,7 +32,7 @@ const addMember = async () => {
 
   try {
     isLoading.value = true;
-    await axios.post("http://localhost:5000/api/invoices", memberData.value);
+    await axios.post(`${API_BASE_URL}/api/invoices`, memberData.value);
     toast.add({ severity: "success", summary: "Berjaya", detail: "Pendaftaran Berjaya!", life: 3000 });
 
     // Reset form
@@ -52,7 +53,7 @@ const addMember = async () => {
 const invoices = ref([]);
 
 onMounted(async () => {
-  const response = await axios.get("http://localhost:5000/api/invoices");
+  const response = await axios.get(`${API_BASE_URL}/api/invoices`);
   invoices.value = response.data;
   console.log("Invoices: ", invoices.value);
 });

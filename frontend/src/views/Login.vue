@@ -6,6 +6,7 @@ import { useToast } from "primevue/usetoast";
 
 const router = useRouter();
 const toast = useToast();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const icNumber = ref("");
 const username = ref("");
@@ -20,12 +21,12 @@ const userOptions = [
 const login = async () => {
   try {
     if (userType.value === "user") {
-      const response = await axios.post("http://localhost:5000/api/auth/user-login", { icNumber: icNumber.value });
+      const response = await axios.post(`${API_BASE_URL}/api/auth/user-login`, { icNumber: icNumber.value });
       localStorage.setItem("userId", icNumber.value);
       toast.add({ severity: "success", summary: "Log Masuk Berjaya", detail: "Sila Tunggu Sebentar...", life: 2000 });
       setTimeout(() => router.push("/invoices"), 1500);
     } else if (userType.value === "admin") {
-      const response = await axios.post("http://localhost:5000/api/auth/admin-login", {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/admin-login`, {
         username: username.value,
         password: password.value,
       });

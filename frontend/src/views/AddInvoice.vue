@@ -17,10 +17,11 @@ const amount = ref("");
 const paymentMethod = ref("");
 const isLoading = ref(false);
 const router = useRouter();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:5000/api/invoices");
+    const response = await axios.get(`${API_BASE_URL}/api/invoices`);
     members.value = response.data;
   } catch (error) {
     toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch members.", life: 3000 });
@@ -35,7 +36,7 @@ const addInvoice = async () => {
 
   try {
     isLoading.value = true;
-    await axios.put(`http://localhost:5000/api/invoices/${selectedMember.value.id}`, {
+    await axios.put(`${API_BASE_URL}/api/invoices/${selectedMember.value.id}`, {
       year: `yuran${year.value}`, // Convert 2024 -> yuran2024
       amount: amount.value,
       kaedahBayaran: paymentMethod.value,
