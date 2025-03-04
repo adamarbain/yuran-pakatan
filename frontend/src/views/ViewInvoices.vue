@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
-import  Button  from "primevue/button";
+import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -164,15 +164,10 @@ const navigateToAdminDashboard = () => {
   <div class="p-5">
     <h1 class="text-2xl font-semibold mb-4">Senarai Ahli PAKATAN</h1>
     <Toast position="top-right" />
-    
+
     <div class="mb-4 flex gap-3">
-      <Dropdown 
-        v-model="selectedKawasan" 
-        :options="uniqueKawasanOptions" 
-        placeholder="Pilih Kawasan" 
-        class="w-full md:w-60" 
-        filter
-      />
+      <Dropdown v-model="selectedKawasan" :options="uniqueKawasanOptions" placeholder="Pilih Kawasan"
+        class="w-full md:w-60" filter />
       <Button @click="exportToXlsx" class="p-button-success">Export XLSX</Button>
       <Button @click="exportToPdf" class="p-button-danger">Export PDF</Button>
     </div>
@@ -211,7 +206,8 @@ const navigateToAdminDashboard = () => {
 
     <!-- Home Button -->
     <div class="home-button-container">
-      <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left" @click="navigateToAdminDashboard" />
+      <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left"
+        @click="navigateToAdminDashboard" />
     </div>
   </div>
 </template>
@@ -227,20 +223,36 @@ button {
   color: white;
   font-weight: 700;
 }
+
 .p-button-success {
   background-color: #28a745;
 }
+
 .p-button-danger {
   background-color: #dc3545;
 }
+
 .home-button-container {
   margin-top: 10px;
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
 }
 
 .p-toast {
   max-width: 400px !important;
   width: auto !important;
+}
+
+/* Ensure contrast in both light and dark modes */
+.p-button-secondary {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--button-secondary-text) !important;
+}
+
+.dark-mode .p-button-secondary {
+  background-color: #343a40 !important; /* Darker shade for dark mode */
 }
 </style>
