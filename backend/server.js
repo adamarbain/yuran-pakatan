@@ -15,12 +15,21 @@ app.use("/api/auth", authRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/infaq", infaqRoutes);
 
-app.get("/api/ping", (req, res) => {
+// ✅ API Gateway for "/" (Ping or Landing Page)
+app.get("/", (req, res) => {
+    res.json({
+        message: "Welcome to the Backend API Gateway!",
+        status: "running",
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// ✅ Lightweight Ping Route
+app.use("/api/ping", (req, res) => {
     res.send("pong");
 });
 
-const PORT = process.env.PORT || 5000; // Use Render’s dynamic port
-
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
@@ -28,8 +37,33 @@ app.listen(PORT, () => {
 const PING_INTERVAL = 30000;
 const SERVER_URL = `${process.env.BACKEND_URL}/api/ping`;
 
-setInterval(() => {
+// ✅ Skibidi Toilet Log Randomizer
+const skibidiLogs = [
+    "skibidi bop mm dada!",
+    "skibidi toilet activated!",
+    "skibidi skibidi toilet 🧻",
+    "skibidi doo wop wop!",
+    "🚽 Skibidi toilet is running!",
+    "camera camera! 📸",
+    "skibidi toilet online 🟢",
+    "doo doo check complete ✅",
+    "skibidi maintenance mode 🔧",
+    "toilet status: operational 🚀",
+    "skibidi system response: OK",
+    "toilet defender activated 🛡️",
+    "skibidi patrol in progress 🚨"
+];
+
+const getRandomSkibidiLog = () => skibidiLogs[Math.floor(Math.random() * skibidiLogs.length)];
+
+// ✅ Keep-Alive Function
+const pingServer = () => {
     axios.get(SERVER_URL)
-        .then(() => console.log("skibidi toilet"))
+        .then(() => console.log(getRandomSkibidiLog()))
         .catch((err) => console.error("Ping failed:", err.message));
-}, PING_INTERVAL);
+
+    setTimeout(pingServer, PING_INTERVAL);
+};
+
+// Start the keep-alive process
+pingServer();
