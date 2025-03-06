@@ -21,7 +21,7 @@ router.get("/:ic", async (req, res) => {
 
 // post new invoice
 router.post("/", async (req, res) => {
-  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat, yuranDaftar, kaedahBayaranDaftar } = req.body;
+  const { noKadPengenalan, namaAhli, noAhli, kawasan, noTel, alamat, yuranDaftar, kaedahBayaranDaftar, notaDaftar } = req.body;
   const invoice = await prisma.yuran.create({
     data: {
       noKadPengenalan,
@@ -32,6 +32,7 @@ router.post("/", async (req, res) => {
       alamat,
       yuranDaftar: Number(yuranDaftar),
       kaedahBayaranDaftar,
+      notaDaftar,
     },
   });
 
@@ -50,9 +51,9 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { year, amount, kaedahBayaran } = req.body; // year is like "yuran2024
+  const { year, amount, kaedahBayaran, nota } = req.body; // year is like "yuran2024
   
-  console.log("Updating Yuran:", { id, year, amount });
+  // console.log("Updating Yuran:", { id, year, amount });
 
   try {
     const existingYuran = await prisma.yuran.findUnique({
@@ -68,28 +69,55 @@ router.put("/:id", async (req, res) => {
     const tahunYuran = year.slice(5);
 
     const yearlyPaymentMethod = "kaedahBayaran" + tahunYuran;
-    console.log("Tahun Kaedah Bayaran: ", { yearlyPaymentMethod });
+    // console.log("Tahun Kaedah Bayaran: ", { yearlyPaymentMethod });
+
+    const yearlyRemarks = "nota" + tahunYuran;
+    // console.log("Tahun Nota: ", { yearlyRemarks });
+
+    const yearlyDate = "tarikh" + tahunYuran;
+    // console.log("Tahun Tarikh: ", { yearlyDate });
 
     await prisma.yuran.update({
       where: { id: Number(id) },
       data: { 
         [year]: Number(amount),
         [yearlyPaymentMethod]: kaedahBayaran,
+        [yearlyRemarks]: nota,
+        [yearlyDate]: new Date(),
       },
     });
 
-    res.json({ message: "Invoice updated successfully" });
+    res.json({ message: "Yuran ${year} berjaya dikemaskini" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error updating invoice" });
+    res.status(500).json({ error: "Gagal kemaskini yuran" });
   }
 });
 
 router.post("/generate-invoice", async (req, res) => {
   try {
-    const { namaAhli, noAhli, alamat, tarikh, jumlah, tahun, noKadPengenalan, noTel, kaedahBayaran } = req.body;
+    const {
+      namaAhli,
+      noAhli,
+      alamat,
+      tarikh,
+      jumlah,
+      tahun,
+      noKadPengenalan,
+      noTel,
+      kaedahBayaran,
+      nota,
+    } = req.body;
 
-    if (!namaAhli || !noAhli || !alamat || !tarikh || !jumlah || !tahun || !noKadPengenalan || !noTel) {
+    if (
+      !namaAhli ||
+      !noAhli ||
+      !alamat ||
+      !jumlah ||
+      !tahun ||
+      !noKadPengenalan ||
+      !noTel
+    ) {
       return res.status(400).json({ error: "Missing required invoice fields" });
     }
 
@@ -113,7 +141,7 @@ router.post("/generate-invoice", async (req, res) => {
       doc.image(logoPath, doc.page.width / 2 - 50, 30, { width: 100 });
     }
     doc.moveDown(3); // Adjust spacing after logo
-    
+
     // Header Section
     doc
       .fontSize(20)
@@ -133,7 +161,7 @@ router.post("/generate-invoice", async (req, res) => {
       .fillColor("#333")
       .text("Maklumat Ahli", { underline: true })
       .moveDown(0.5);
-    
+
     doc
       .font("Helvetica-Bold")
       .text(`Nama Ahli:`, { continued: true })
@@ -145,25 +173,24 @@ router.post("/generate-invoice", async (req, res) => {
       .font("Helvetica")
       .text(` ${noAhli}`);
 
-      doc
+    doc
       .font("Helvetica-Bold")
       .text(`No Kad Pengenalan:`, { continued: true })
       .font("Helvetica")
-      .text(` ${noKadPengenalan}`)
+      .text(` ${noKadPengenalan}`);
 
     doc
       .font("Helvetica-Bold")
       .text(`Alamat:`, { continued: true })
       .font("Helvetica")
-      .text(` ${alamat}`)
+      .text(` ${alamat}`);
 
-      doc
+    doc
       .font("Helvetica-Bold")
       .text(`No Telefon:`, { continued: true })
       .font("Helvetica")
       .text(` ${noTel}`)
       .moveDown(1);
-    
 
     // Payment Details
     doc
@@ -172,11 +199,14 @@ router.post("/generate-invoice", async (req, res) => {
       .text("Maklumat Pembayaran", { underline: true })
       .moveDown(0.5);
 
-    doc
+    if (tarikh) {
+      doc
       .font("Helvetica-Bold")
       .text(`Tarikh:`, { continued: true })
       .font("Helvetica")
       .text(` ${tarikh}`);
+    }
+
     doc
       .font("Helvetica-Bold")
       .text(`Tahun:`, { continued: true })
@@ -187,7 +217,7 @@ router.post("/generate-invoice", async (req, res) => {
       .text(`Jumlah:`, { continued: true })
       .font("Helvetica")
       .text(` RM ${jumlah.toFixed(2)}`);
-      
+
     if (kaedahBayaran) {
       doc
         .font("Helvetica-Bold")
@@ -196,7 +226,33 @@ router.post("/generate-invoice", async (req, res) => {
         .text(` ${kaedahBayaran}`)
         .moveDown(20);
     } else {
-      doc.moveDown(21);
+      doc.moveDown(19);
+    }
+
+    // Nota Section
+    if (nota) {
+      doc
+        .fontSize(12)
+        .fillColor("#333")
+        .text("Catatan", { underline: true })
+        .moveDown(0.5);
+      doc
+        .font("Helvetica-Bold")
+        .text(`Catatan:`, { continued: true })
+        .font("Helvetica")
+        .text(` ${nota}`)
+        .moveDown(3);
+    } else {
+      doc
+        .fontSize(12)
+        .fillColor("#333")
+        .text("Catatan", { underline: true })
+        .moveDown(0.5);
+      doc
+        .font("Helvetica-Bold")
+        .text(`Catatan:`, { continued: true })
+        .font("Helvetica")
+        .moveDown(3);
     }
 
     // Thank You Note

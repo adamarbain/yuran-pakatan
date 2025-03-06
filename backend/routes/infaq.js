@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
 
 // Create New Infaq
 router.post("/", async (req, res) => {
-    const { userId, amount, kaedahBayaranInfaq } = req.body;
+    const { userId, amount, kaedahBayaranInfaq, notaInfaq } = req.body;
     // console.log(req.body);
     const infaq = await prisma.infaq.create({
         data: {
@@ -19,6 +19,7 @@ router.post("/", async (req, res) => {
             },
             amount,
             kaedahBayaranInfaq,
+            notaInfaq,
         },
     });
     res.json(infaq);
@@ -32,7 +33,7 @@ router.get("/:userId", async (req, res) => {
             infaqs: true,
         },
     });
-    console.log(userwithinfaq);
+    // console.log(userwithinfaq);
     res.json(userwithinfaq);
 });
 

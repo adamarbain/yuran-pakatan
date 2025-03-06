@@ -5,6 +5,7 @@ import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
+import InputText from "primevue/inputtext"; // Added InputText component
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -18,6 +19,10 @@ const router = useRouter();
 const toast = useToast();
 const infaqList = ref([]);
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// Search query variables
+const memberSearchQuery = ref("");
+const infaqSearchQuery = ref("");
 
 onMounted(async () => {
   const response = await axios.get(`${API_BASE_URL}/api/invoices`);
@@ -47,9 +52,51 @@ const filteredInvoices = computed(() => {
   return invoices.value.filter((invoice) => invoice.kawasan.toLowerCase() === selectedKawasan.value);
 });
 
+// Add search functionality to invoices
+const filteredMembersBySearch = computed(() => {
+  if (!memberSearchQuery.value) return filteredInvoices.value;
+  
+  const searchTerm = memberSearchQuery.value.toLowerCase();
+  return filteredInvoices.value.filter(invoice => 
+    invoice.namaAhli.toLowerCase().includes(searchTerm) ||
+    invoice.noAhli.toString().includes(searchTerm) ||
+    invoice.noKadPengenalan.toLowerCase().includes(searchTerm) ||
+    invoice.kawasan.toLowerCase().includes(searchTerm) ||
+    (invoice.alamat && invoice.alamat.toLowerCase().includes(searchTerm)) ||
+    (invoice.noTel && invoice.noTel.toLowerCase().includes(searchTerm))
+  );
+});
+
+// Format the data for display
+const formattedInfaqList = computed(() => {
+  return infaqList.value.map((item) => ({
+    id: item.id,
+    namaAhli: item.user.username,
+    noKadPengenalan: item.user.icNumber,
+    amount: item.amount,
+    kaedahBayaran: item.kaedahBayaranInfaq,
+    tarikh: new Date(item.date).toLocaleDateString("ms-MY"), // Format date
+  }));
+});
+
+// Add search functionality to infaq list
+const filteredInfaqBySearch = computed(() => {
+  if (!infaqSearchQuery.value) return formattedInfaqList.value;
+  
+  const searchTerm = infaqSearchQuery.value.toLowerCase();
+  return formattedInfaqList.value.filter(infaq => 
+    infaq.namaAhli.toLowerCase().includes(searchTerm) ||
+    infaq.noKadPengenalan.toLowerCase().includes(searchTerm) ||
+    infaq.amount.toString().includes(searchTerm) ||
+    infaq.kaedahBayaran.toLowerCase().includes(searchTerm) ||
+    infaq.tarikh.toLowerCase().includes(searchTerm)
+  );
+});
+
 // Export to XLSX (Excel)
 const exportToXlsx = () => {
-  const worksheet = XLSX.utils.json_to_sheet(filteredInvoices.value);
+  // Use the filtered and searched results for export
+  const worksheet = XLSX.utils.json_to_sheet(filteredMembersBySearch.value);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");
   XLSX.writeFile(workbook, "Senarai Ahli PAKATAN.xlsx");
@@ -62,7 +109,7 @@ const exportToXlsx = () => {
 
 const exportToPdf = () => {
   const doc = new jsPDF({
-    orientation: "landscape", // Landscape mode for better width management
+    orientation: "landscape",
     unit: "mm",
     format: "a4",
   });
@@ -76,7 +123,8 @@ const exportToPdf = () => {
     "2031", "2032"
   ];
 
-  const tableRows = filteredInvoices.value.map(invoice => [
+  // Use the filtered and searched results for export
+  const tableRows = filteredMembersBySearch.value.map(invoice => [
     invoice.namaAhli,
     invoice.noAhli,
     invoice.noKadPengenalan,
@@ -143,18 +191,6 @@ const exportToPdf = () => {
   });
 };
 
-// Format the data for display
-const formattedInfaqList = computed(() => {
-  return infaqList.value.map((item) => ({
-    id: item.id,
-    namaAhli: item.user.username,
-    noKadPengenalan: item.user.icNumber,
-    amount: item.amount,
-    kaedahBayaran: item.kaedahBayaranInfaq,
-    tarikh: new Date(item.date).toLocaleDateString("ms-MY"), // Format date
-  }));
-});
-
 const navigateToAdminDashboard = () => {
   router.push("/admin-dashboard");
 };
@@ -165,15 +201,41 @@ const navigateToAdminDashboard = () => {
     <h1 class="text-2xl font-semibold mb-4">Senarai Ahli PAKATAN</h1>
     <Toast position="top-right" />
 
-    <div class="mb-4 flex gap-3">
-      <Dropdown v-model="selectedKawasan" :options="uniqueKawasanOptions" placeholder="Pilih Kawasan"
-        class="w-full md:w-60" filter />
-      <Button @click="exportToXlsx" class="p-button-success">Export XLSX</Button>
-      <Button @click="exportToPdf" class="p-button-danger">Export PDF</Button>
+    <div class="mb-4 flex flex-wrap gap-3 items-center">
+      <Dropdown 
+        v-model="selectedKawasan" 
+        :options="uniqueKawasanOptions" 
+        placeholder="Pilih Kawasan"
+        class="w-full md:w-60" 
+        filter 
+      />
+      <div class="flex gap-2">
+        <Button @click="exportToXlsx" class="p-button-success">Export XLSX</Button>
+        <Button @click="exportToPdf" class="p-button-danger">Export PDF</Button>
+      </div>
+    </div>
+
+    <!-- Search box for Member List - Fixed positioning of search icon -->
+    <div class="mb-3 w-full relative">
+      <span class="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+        <i class="pi pi-search text-gray-400 mt-2 ml-3"></i>
+      </span>
+      <InputText 
+        v-model="memberSearchQuery" 
+        placeholder="Cari ahli..." 
+        class="w-full pl-10"
+      />
     </div>
 
     <!-- Member List DataTable -->
-    <DataTable :value="filteredInvoices" paginator :rows="10" class="p-datatable-sm shadow-md mb-6">
+    <DataTable 
+      :value="filteredMembersBySearch" 
+      paginator 
+      :rows="10" 
+      class="p-datatable-sm shadow-md mb-6"
+      :globalFilterFields="['namaAhli', 'noAhli', 'noKadPengenalan', 'kawasan', 'alamat', 'noTel']"
+      responsiveLayout="scroll"
+    >
       <Column field="namaAhli" header="Nama Ahli" sortable></Column>
       <Column field="noAhli" header="No Ahli" sortable></Column>
       <Column field="noKadPengenalan" header="No Kad Pengenalan"></Column>
@@ -196,7 +258,27 @@ const navigateToAdminDashboard = () => {
 
     <!-- Infaq Contributions Table -->
     <h1 class="text-2xl font-semibold my-4">Senarai Infaq</h1>
-    <DataTable :value="formattedInfaqList" paginator :rows="10" class="p-datatable-sm shadow-md">
+    
+    <!-- Search box for Infaq List - Fixed positioning of search icon -->
+    <div class="mb-3 w-full relative">
+      <span class="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+        <i class="pi pi-search text-gray-400 mt-2 ml-3"></i>
+      </span>
+      <InputText 
+        v-model="infaqSearchQuery" 
+        placeholder="Cari infaq..." 
+        class="w-full pl-10"
+      />
+    </div>
+    
+    <DataTable 
+      :value="filteredInfaqBySearch" 
+      paginator 
+      :rows="10" 
+      class="p-datatable-sm shadow-md"
+      :globalFilterFields="['namaAhli', 'noKadPengenalan', 'amount', 'kaedahBayaran', 'tarikh']"
+      responsiveLayout="scroll"
+    >
       <Column field="namaAhli" header="Nama Ahli" sortable></Column>
       <Column field="noKadPengenalan" header="No Kad Pengenalan"></Column>
       <Column field="amount" header="Jumlah Infaq (RM)" sortable></Column>
@@ -204,17 +286,20 @@ const navigateToAdminDashboard = () => {
       <Column field="tarikh" header="Tarikh Infaq"></Column>
     </DataTable>
 
-    <!-- Home Button -->
-    <div class="home-button-container">
-      <Button label="Kembali ke Laman Admin" class="p-button-secondary w-full" icon="pi pi-arrow-left"
-        @click="navigateToAdminDashboard" />
+    <!-- Home Button - Centered on mobile, left-aligned on desktop -->
+    <div class="mt-6 flex justify-center md:justify-start">
+      <Button 
+        label="Kembali ke Laman Admin" 
+        class="p-button-secondary" 
+        icon="pi pi-arrow-left"
+        @click="navigateToAdminDashboard" 
+      />
     </div>
   </div>
 </template>
 
-
 <style scoped>
-button {
+.p-button {
   padding: 8px 12px;
   border: none;
   cursor: pointer;
@@ -232,15 +317,6 @@ button {
   background-color: #dc3545;
 }
 
-.home-button-container {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  max-width: 450px;
-  text-align: center;
-}
-
 .p-toast {
   max-width: 400px !important;
   width: auto !important;
@@ -248,11 +324,27 @@ button {
 
 /* Ensure contrast in both light and dark modes */
 .p-button-secondary {
-  background-color: var(--button-secondary-bg) !important;
-  color: var(--button-secondary-text) !important;
+  background-color: var(--button-secondary-bg, #6c757d) !important;
+  color: var(--button-secondary-text, white) !important;
 }
 
-.dark-mode .p-button-secondary {
+:deep(.dark-mode) .p-button-secondary {
   background-color: #343a40 !important; /* Darker shade for dark mode */
+}
+
+/* Make the tables responsive */
+:deep(.p-datatable-wrapper) {
+  overflow-x: auto;
+}
+
+/* Ensure input fields have proper padding for the icon */
+.p-inputtext {
+  padding-left: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .p-button {
+    width: 100%;
+  }
 }
 </style>

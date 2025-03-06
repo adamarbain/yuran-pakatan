@@ -25,41 +25,81 @@ model User {
 }
 
 model Yuran {
-  id                  Int      @id @default(autoincrement())
-  namaAhli            String
-  noAhli              String
-  noKadPengenalan     String   @unique
-  alamat              String
-  kawasan             String
-  noTel               String
+  id              Int    @id @default(autoincrement())
+  namaAhli        String
+  noAhli          String
+  noKadPengenalan String @unique
+  alamat          String
+  kawasan         String
+  noTel           String
+
   yuranDaftar         Int?
   kaedahBayaranDaftar String?
-  yuran2021           Int?
-  kaedahBayaran2021   String?
-  yuran2022           Int?
-  kaedahBayaran2022   String?
-  yuran2023           Int?
-  kaedahBayaran2023   String?
-  yuran2024           Int?
-  kaedahBayaran2024   String?
-  yuran2025           Int?
-  kaedahBayaran2025   String?
-  yuran2026           Int?
-  kaedahBayaran2026   String?
-  yuran2027           Int?
-  kaedahBayaran2027   String?
-  yuran2028           Int?
-  kaedahBayaran2028   String?
-  yuran2029           Int?
-  kaedahBayaran2029   String?
-  yuran2030           Int?
-  kaedahBayaran2030   String?
-  yuran2031           Int?
-  kaedahBayaran2031   String?
-  yuran2032           Int?
-  kaedahBayaran2032   String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  notaDaftar          String?
+  tarikhDaftar        DateTime?
+
+  yuran2021         Int?
+  kaedahBayaran2021 String?
+  nota2021          String?
+  tarikh2021        DateTime?
+
+  yuran2022         Int?
+  kaedahBayaran2022 String?
+  nota2022          String?
+  tarikh2022        DateTime?
+
+  yuran2023         Int?
+  kaedahBayaran2023 String?
+  nota2023          String?
+  tarikh2023        DateTime?
+
+  yuran2024         Int?
+  kaedahBayaran2024 String?
+  nota2024          String?
+  tarikh2024        DateTime?
+
+  yuran2025         Int?
+  kaedahBayaran2025 String?
+  nota2025          String?
+  tarikh2025        DateTime?
+
+  yuran2026         Int?
+  kaedahBayaran2026 String?
+  nota2026          String?
+  tarikh2026        DateTime?
+
+  yuran2027         Int?
+  kaedahBayaran2027 String?
+  nota2027          String?
+  tarikh2027        DateTime?
+
+  yuran2028         Int?
+  kaedahBayaran2028 String?
+  nota2028          String?
+  tarikh2028        DateTime?
+
+  yuran2029         Int?
+  kaedahBayaran2029 String?
+  nota2029          String?
+  tarikh2029        DateTime?
+
+  yuran2030         Int?
+  kaedahBayaran2030 String?
+  nota2030          String?
+  tarikh2030        DateTime?
+
+  yuran2031         Int?
+  kaedahBayaran2031 String?
+  nota2031          String?
+  tarikh2031        DateTime?
+
+  yuran2032         Int?
+  kaedahBayaran2032 String?
+  nota2032          String?
+  tarikh2032        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Infaq {
@@ -67,6 +107,7 @@ model Infaq {
   amount             Float
   kaedahBayaranInfaq String?
   date               DateTime @default(now())
+  notaInfaq          String?
   userId             String // Foreign key
   user               User     @relation(fields: [userId], references: [id])
 }

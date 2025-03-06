@@ -20,7 +20,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 onMounted(async () => {
   const userId = localStorage.getItem("userId");
   if (!userId) {
-    toast.add({ severity: "warn", summary: "Redirecting", detail: "User ID not found!", life: 3000 });
+    toast.add({ severity: "warn", summary: "Peringatan", detail: "ID pengguna tidak dijumpai.", life: 3000 });
     return;
   }
 
@@ -35,7 +35,7 @@ onMounted(async () => {
         .map((key) => key.replace("yuran", ""));
     }
   } catch (error) {
-    toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch invoices.", life: 3000 });
+    toast.add({ severity: "error", summary: "Amaran", detail: "Gagal memuat data", life: 3000 });
   }
 
   try {
@@ -48,25 +48,29 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error("Error fetching user infaq:", error);
-    toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch data", life: 3000 });
+    toast.add({ severity: "error", summary: "Amaran", detail: "Gagal memuat data", life: 3000 });
   }
 });
 
 const printInvoice = async (user, year) => {
   const amount = user[`yuran${year}`];
   const kaedahBayaranValue = user[`kaedahBayaran${year}`];
+  const tarikh = user[`tarikh${year}`];
+  const nota = user[`nota${year}`];
+
   if (amount > 0) {
     try {
       const invoiceData = {
         namaAhli: user.namaAhli,
         noAhli: user.noAhli,
         alamat: user.alamat,
-        tarikh: new Date().toLocaleDateString("ms-MY"),
+        tarikh: tarikh || new Date().toLocaleDateString("ms-MY"),
         jumlah: amount,
         tahun: year,
         noKadPengenalan: user.noKadPengenalan,
         noTel: user.noTel,
         kaedahBayaran: kaedahBayaranValue,
+        nota,
       };
 
       const response = await axios.post(
@@ -90,7 +94,7 @@ const printInvoice = async (user, year) => {
       toast.add({ severity: "error", summary: "Gagal", detail: "Cetakan Resit Gagal.", life: 3000 });
     }
   } else {
-    toast.add({ severity: "warn", summary: "No Payment", detail: `No payment recorded for ${user.namaAhli} in ${year}.`, life: 3000 });
+    toast.add({ severity: "warn", summary: "Peringatan", detail: `Tiada rekod yuran untuk ${user.namaAhli} in ${year}.`, life: 3000 });
   }
 };
 
@@ -140,6 +144,7 @@ const navigateHome = () => {
           </Column>
           <Column field="amount" header="Jumlah (RM)" sortable></Column>
           <Column field="kaedahBayaranInfaq" header="Kaedah Bayaran" sortable></Column>
+          <Column field="notaInfaq" header="Nota" sortable></Column>
         </DataTable>
       </template>
       <template #content v-else>

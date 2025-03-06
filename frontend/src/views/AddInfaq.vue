@@ -4,6 +4,7 @@ import axios from "axios";
 import Card from "primevue/card";
 import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
+import Textarea from "primevue/textarea";
 import Button from "primevue/button";
 import { useRouter } from "vue-router";
 import Toast from "primevue/toast";
@@ -14,6 +15,7 @@ const users = ref([]);
 const selectedUser = ref(null);
 const infaqAmount = ref(null);
 const paymentMethod = ref("");
+const remarks = ref("");
 const toast = useToast();
 const isLoading = ref(false);
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -30,7 +32,7 @@ onMounted(async () => {
 
 // Submit infaq data
 const submitInfaq = async () => {
-  if (!selectedUser.value || !infaqAmount.value || !paymentMethod.value) {
+  if (!selectedUser.value || !infaqAmount.value || !paymentMethod.value || !remarks.value) {
     toast.add({ severity: "warn", summary: "Peringatan", detail: "Sila isi semua maklumat.", life: 3000 });
     return;
   }
@@ -41,6 +43,7 @@ const submitInfaq = async () => {
       userId: selectedUser.value.noKadPengenalan,
       amount: infaqAmount.value,
       kaedahBayaranInfaq: paymentMethod.value,
+      notaInfaq: remarks.value,
     });
 
     toast.add({ severity: "success", summary: "Berjaya", detail: "Bayaran Infaq berjaya!", life: 3000 });
@@ -106,6 +109,11 @@ const paymentMethods = [
             placeholder="Pilih kaedah bayaran"
             class="w-full mt-2"
           />
+        </div>
+
+        <div class="form-group">
+          <label>Nota:</label>
+          <Textarea v-model="remarks" placeholder="Masukkan Nota" class="p-inputtext-lg w-full mt-2" autoResize />
         </div>
 
         <div class="button-group">

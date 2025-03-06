@@ -20,6 +20,7 @@ const memberData = ref({
   noTel: "",
   yuranDaftar: null,
   kaedahBayaranDaftar: "",
+  notaDaftar: "",
 });
 
 const isLoading = ref(false);
@@ -55,7 +56,7 @@ const invoices = ref([]);
 onMounted(async () => {
   const response = await axios.get(`${API_BASE_URL}/api/invoices`);
   invoices.value = response.data;
-  console.log("Invoices: ", invoices.value);
+  // console.log("Invoices: ", invoices.value);
 });
 
 // Get unique kawasan values
@@ -111,6 +112,9 @@ const paymentMethods = [
 
           <label>Kaedah Pembayaran</label>
           <Dropdown v-model="memberData.kaedahBayaranDaftar" :options="paymentMethods" optionLabel="label" optionValue="value"  placeholder="Pilih Kaedah Bayaran" class="p-inputtext-lg w-full" />
+
+          <label>Nota</label>
+          <Textarea v-model="memberData.notaDaftar" placeholder="Masukkan Nota" class="p-inputtext-lg w-full" autoResize />
 
           <Button 
             :label="isLoading ? 'Adding...' : 'Daftar Ahli Baru'" 

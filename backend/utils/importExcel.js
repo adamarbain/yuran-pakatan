@@ -7,11 +7,11 @@ async function importExcel(filePath) {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const data = xlsx.utils.sheet_to_json(sheet, { header: 1 }); // Read as array of arrays
 
-  console.log("Raw Data:", data.slice(0, 5)); // ✅ Print first 5 rows for debugging
+  // console.log("Raw Data:", data.slice(0, 5)); // ✅ Print first 5 rows for debugging
 
   // Extract column headers from first row
   const headers = data[0].map((h) => h.trim());
-  console.log("Headers Detected:", headers); // ✅ Log detected headers
+  // console.log("Headers Detected:", headers); // ✅ Log detected headers
 
   // Convert the array into an object-based structure
   const formattedData = data.slice(1).map((row) => {
@@ -49,7 +49,7 @@ async function importExcel(filePath) {
       data: {
         namaAhli: row.namaAhli,
         noAhli: row.noAhli,
-        noKadPengenalan: String(row.noKadPengenalan) || "0000-00-0000",
+        noKadPengenalan: String(row.noKadPengenalan) || row.namaAhli,
         alamat: row.alamat,
         kawasan: row.kawasan,
         noTel: String(row.noTel),
