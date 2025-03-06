@@ -124,7 +124,7 @@ const navigateHome = () => {
             </div>
           </div>
         </div>
-        <p v-else>No invoices found.</p>
+        <p v-else>Rekod Yuran Tidak Dijumpai.</p>
       </template>
     </Card>
 
