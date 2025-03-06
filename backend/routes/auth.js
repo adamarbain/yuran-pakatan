@@ -34,7 +34,7 @@ router.post("/admin-login", async (req, res) => {
   const { username, password } = req.body;
   const user = await prisma.user.findUnique({ where: { username } });
 
-  console.log(user);
+  // console.log(user);
 
   if (!user || user.role !== 'admin') return res.status(401).json({ error: "Unauthorized" });
 

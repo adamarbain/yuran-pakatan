@@ -65,7 +65,7 @@ const pingServer = () => {
 };
 
 // Start the keep-alive process
-// pingServer(); // Comment this line to disable the keep-alive function and save resources
+pingServer(); // Comment this line to disable the keep-alive function and save resources
 // Render spins down a Free web service that goes 15 minutes without receiving inbound traffic
 // So I already set up UptimeRobot to ping the server every 5 minutes to keep it alive
 // If you want to enable the keep-alive function, uncomment the line above

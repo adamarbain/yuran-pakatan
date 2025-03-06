@@ -4,6 +4,7 @@ import axios from "axios";
 import { useToast } from "primevue/usetoast";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Toast from "primevue/toast";
@@ -15,6 +16,7 @@ const selectedMember = ref(null);
 const year = ref("");
 const amount = ref("");
 const paymentMethod = ref("");
+const remarks = ref("");
 const isLoading = ref(false);
 const router = useRouter();
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -40,6 +42,7 @@ const addInvoice = async () => {
       year: `yuran${year.value}`, // Convert 2024 -> yuran2024
       amount: amount.value,
       kaedahBayaran: paymentMethod.value,
+      nota: remarks.value,
     });
 
     toast.add({ severity: "success", summary: "Berjaya", detail: "Bayaran Yuran Berjaya!", life: 3000 });
@@ -109,6 +112,9 @@ const paymentMethods = [
             class="w-full p-inputtext-lg"
           />
 
+          <label>Nota</label>
+          <Textarea v-model="remarks" placeholder="Masukkan Nota" class="p-inputtext-lg w-full" autoResize />
+
           <Button 
             :label="isLoading ? 'Mengemaskini...' : 'Bayar Yuran'" 
             icon="pi pi-file" 
@@ -116,6 +122,7 @@ const paymentMethods = [
             :disabled="isLoading" 
             @click="addInvoice" 
           />
+
         </div>
       </template>
     </Card>
